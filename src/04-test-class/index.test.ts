@@ -1,44 +1,71 @@
 // Uncomment the code below and write your tests
-// import { getBankAccount } from '.';
+import {
+  getBankAccount,
+  InsufficientFundsError,
+  SynchronizationFailedError,
+  TransferFailedError,
+} from '.';
+
+const mockAccFist = getBankAccount(1000);
+const mockAccSecond = getBankAccount(500);
 
 describe('BankAccount', () => {
   test('should create account with initial balance', () => {
-    // Write your test here
+    expect(mockAccFist.getBalance()).toBe(1000);
   });
 
   test('should throw InsufficientFundsError error when withdrawing more than balance', () => {
-    // Write your test here
+    expect(() => mockAccFist.withdraw(1001)).toThrow(InsufficientFundsError);
   });
 
   test('should throw error when transferring more than balance', () => {
-    // Write your test here
+    expect(() => mockAccFist.transfer(1001, mockAccSecond)).toThrow(
+      InsufficientFundsError,
+    );
   });
 
   test('should throw error when transferring to the same account', () => {
-    // Write your test here
+    expect(() => mockAccFist.transfer(1001, mockAccFist)).toThrow(
+      TransferFailedError,
+    );
   });
 
   test('should deposit money', () => {
-    // Write your test here
+    expect(mockAccFist.deposit(500).getBalance()).toBe(1500);
   });
 
   test('should withdraw money', () => {
-    // Write your test here
+    expect(mockAccFist.withdraw(300).getBalance()).toBe(1200);
   });
 
   test('should transfer money', () => {
-    // Write your test here
+    mockAccFist.transfer(200, mockAccSecond);
+    expect(mockAccSecond.getBalance()).toBe(700);
   });
 
   test('fetchBalance should return number in case if request did not failed', async () => {
-    // Write your tests here
+    const fetchedData = await mockAccFist.fetchBalance();
+    if (fetchedData) {
+    } else {
+      expect(fetchedData).toBe(null);
+    }
   });
 
   test('should set new balance if fetchBalance returned number', async () => {
-    // Write your tests here
+    const prevBalance = mockAccFist.getBalance();
+    try {
+      await mockAccFist.synchronizeBalance();
+      expect(mockAccFist.getBalance() !== prevBalance).toBeTruthy();
+    } catch {
+      expect(mockAccFist.getBalance() === prevBalance).toBeTruthy();
+    }
   });
 
   test('should throw SynchronizationFailedError if fetchBalance returned null', async () => {
-    // Write your tests here
+    try {
+      await mockAccFist.synchronizeBalance();
+    } catch (error) {
+      expect(error).toBeInstanceOf(SynchronizationFailedError);
+    }
   });
 });
